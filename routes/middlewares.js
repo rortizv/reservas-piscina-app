@@ -2,25 +2,25 @@ const jwt = require('jwt-simple');
 const moment = require('moment');
 
 const checkToken = (req, res, next) => {
-
-    if(req.headers['usuario-token']) {
-        return res.json({ error: 'Necesitas incluir el usuario-token en la cabecera' });
+    console.log(req.headers["authorization"]);
+    if(!req.headers["authorization"]) {
+        return res.status(401).json({ error: 'Necesitas incluir el token en la cabecera' });
     }
-
-    const usuarioToken = req.headers['usuario-token'];
+    
+    const usuarioToken = req.headers["authorization"];
     let payload = {};
-
+    
     try {
         payload = jwt.decode(usuarioToken, 'frase secreta');
     } catch (err) {
-        return res.json({ error: 'El token es incorrecto'});
+        return res.status(401).json({ error: 'El token es incorrecto', err});
     }
 
     if(payload.expiredAt < moment().unix()) {
-        return res.json({ error: 'El token ha expirado' });
+        return res.status(401).json({ error: 'El token ha expirado' });
     }
 
-    req.usuarioId = payload.usuarioId;
+    req.id_usuario = payload.id_usuario;
 
     next();
 }
